@@ -23,7 +23,7 @@ $ rrr g s my-state
 <summary>Generated files</summary>
 
 <details>
-<summary>`src/store/my-state/action-type.ts` has two dummy action types.</summary>
+<summary><code>src/store/my-state/action-type.ts</code> has two dummy action types.</summary>
 
 ```
 enum ActionType {
@@ -36,7 +36,7 @@ export default ActionType
 </details>
 
 <details>
-<summary>`src/store/my-state/actions.ts` has two dummy action creators.</summary>
+<summary><code>src/store/my-state/actions.ts</code> has two dummy action creators.</summary>
 
 ```
 import createAction from '../../create-action'
@@ -50,7 +50,7 @@ export const action2 = () => createAction(ActionType.action2)
 `src/store/my-state/interface.ts` is an empty file.
 
 <details>
-<summary>`src/store/my-state/reducer.ts` has a reduced which handles the two dummy actions.</summary>
+<summary><code>src/store/my-state/reducer.ts</code> has a reduced which handles the two dummy actions.</summary>
 
 ```
 import { Reducer } from 'redux'
@@ -81,7 +81,7 @@ export default reducer
 </details>
 
 <details>
-<summary>`src/store/my-state/state.ts` is ready for type info on the state and the initial value.</summary>
+<summary><code>src/store/my-state/state.ts</code> is ready for type info on the state and the initial value.</summary>
 
 ```
 interface Interface {
@@ -97,7 +97,7 @@ export { initialState }
 </details>
 
 <details>
-<summary>`src/store/my-state/index.ts` is a barrel which exposes relevant parts to public.</summary>
+<summary><code>src/store/my-state/index.ts</code> is a barrel which exposes relevant parts to public.</summary>
 
 ```
 import * as actionTypes from './action-type'
@@ -115,7 +115,7 @@ export {
 </details>
 
 <details>
-<summary>`src/store/reducer.ts` is updated to include the newly created reducer for `my-state`.</summary>
+<summary><code>src/store/reducer.ts</code> is updated to include the newly created reducer for `my-state`.</summary>
 
 ```
 import { combineReducers } from 'redux'
@@ -134,7 +134,7 @@ export default combineReducers({
 </details>
 
 <details>
-<summary>`src/store/state.ts` is updated in a similar fashion.</summary>
+<summary><code>src/store/state.ts</code> is updated in a similar fashion.</summary>
 
 ```
 import Me from './me/state'
