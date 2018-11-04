@@ -2,6 +2,18 @@
 
 > This project is **WIP**. Stay away or else!
 
+Opinions which are included or will be included:
+
+- `react` because duh
+- `redux` because duh
+- `react-redux` because of two duhs above
+- `redux-form` because forms are extremly common and yet extremly complex to handle properly
+- `react-router-dom` because real apps need deep links
+- `connected-react-router` because the current page belongs to the store
+- `redux-saga` because asynchronous stuff gets out of hand quickly
+- `styled-components` because it's the least evil way to style
+- `axios` because `fetch` is incomplete and `XMLHttpRequest` is an abomination
+
 ## Commands
 
 - `g`, `generate`
