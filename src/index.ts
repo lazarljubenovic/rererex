@@ -4,8 +4,8 @@ import path from 'path'
 import * as util from './util'
 import * as generate from './generate'
 import * as remove from './remove'
-import { Project, PropertyAccessExpression, QuoteKind, IndentationText } from 'ts-simple-ast'
-
+import {IndentationText, Project, QuoteKind} from 'ts-simple-ast'
+import * as bootstrap from './bootstrap'
 
 function createProject (root: string) {
   const project = new Project({
@@ -21,6 +21,35 @@ function createProject (root: string) {
 async function main () {
   const args = process.argv.slice(2)
   const root = await util.findRoot(process.cwd())
+
+  console.log('Root is', root)
+
+  if (root == null) {
+    if (args[0] == 'b' || args[0] == 'bootstrap') {
+
+      if (args.length == 1) {
+        console.error(`Tell me the name of the project you wanna bootstrap.`)
+        process.exit(1)
+      }
+
+      const projectName = args[1]
+
+      try {
+        await bootstrap.app(process.cwd(), projectName)
+      } catch (e) {
+        console.error(e)
+        process.exit(1)
+      }
+
+      process.exit(0)
+
+    }
+
+    console.error(`Not in an existing project, only [b]ootstrap command is allowed.`)
+    process.exit(1)
+    return
+  }
+
   const project = createProject(root)
 
   if (args.length == 0) {

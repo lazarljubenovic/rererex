@@ -11,7 +11,7 @@ async function hasDir (parent: string, child: string): Promise<boolean> {
   return false
 }
 
-export default async function findRoot (dirname: string): Promise<string> {
+export default async function findRoot (dirname: string): Promise<string | undefined> {
   let currentDir = dirname
   let i = 100
   while (true) {
@@ -19,5 +19,6 @@ export default async function findRoot (dirname: string): Promise<string> {
     if (hasNodeModules) return currentDir
     if (--i < 0) throw new Error('Infinite loop! Blame the dumb developer.')
     currentDir = path.join(currentDir, '..')
+    if (currentDir == '/') return undefined
   }
 }

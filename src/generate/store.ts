@@ -6,6 +6,7 @@ import * as casing from 'change-case'
 
 export default async function generateStore (dirname: string, name: string, project: Project) {
   const root = await util.findRoot(dirname)
+  if (root == null) throw new Error(`Cannot find project root.`)
   console.info(`Project root is ${root}...`)
   console.info(`Gonna generate a store "${name}"...`)
 
