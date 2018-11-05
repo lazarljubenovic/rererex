@@ -2,6 +2,7 @@
 
 import * as generate from './generate'
 import * as remove from './remove'
+import * as rename from './rename'
 import * as bootstrap from './bootstrap'
 import {Tree} from './runner/tree'
 import {main} from './runner'
@@ -61,6 +62,24 @@ const tree: Tree = [
             command: null,
             run: async ([_, __, name], root, project) => {
               await remove.action(root, name, project)
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    command: ['rename'],
+    errorMessage: `Tell me what to rename.`,
+    children: [
+      {
+        command: ['action', 'a'],
+        errorMessage: `Tell me the name of the action you want to remove.`,
+        children: [
+          {
+            command: null,
+            run: async ([_, __, name, newName], root, project) => {
+              await rename.action(root, name, newName, project)
             },
           },
         ],

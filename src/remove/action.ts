@@ -1,10 +1,9 @@
-import Project, { SyntaxKind, CallSignatureDeclaration, CaseClause, TypeGuards } from "ts-simple-ast"
+import Project, {SyntaxKind, TypeGuards} from "ts-simple-ast"
 import path from 'path'
 import * as util from '../util'
-import { stripIndent } from 'common-tags'
 
-export default async function removeAction(root: string, action: string, project: Project) {
-  const { store, actionName } = util.processActionName(action)
+export default async function removeAction (root: string, action: string, project: Project) {
+  const {store, actionName} = util.processActionName(action)
 
   const storeDirPath = path.join(root, 'src', 'store', store)
 

@@ -16,15 +16,8 @@ function getDesiredNode (args: string[], tree: Tree): LeafNode {
     const currentArg = argsLeft.shift()
     const matchedNode = currentNode.children
       .find(node => node.command == null || node.command.some(c => c == currentArg))
-    if (matchedNode == null) {
-      throw new Error(`Cannot parse command.`)
-    }
-    if (isLeafNode(matchedNode)) {
-      if (argsLeft.length > 0) {
-        throw new Error(`Reached leaf node before finishing the command.`)
-      }
-      return matchedNode
-    }
+    if (matchedNode == null) throw new Error(`Cannot parse command.`)
+    if (isLeafNode(matchedNode)) return matchedNode
     currentNode = matchedNode
   }
 

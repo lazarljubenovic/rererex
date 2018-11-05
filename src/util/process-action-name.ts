@@ -7,7 +7,7 @@ export default function processActionName (string: string): { store: string, act
     throwInvalidActionName()
   }
   const [store, actionName] = string.split('/')
-  if (store == null || store.length == 1 || actionName == null || actionName.length == 1) {
+  if (store == null || store.length == 0 || actionName == null || actionName.length == 0) {
     throwInvalidActionName()
   }
   return { store, actionName }
