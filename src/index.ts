@@ -86,7 +86,7 @@ const tree: Tree = [
     children: [
       {
         command: ['action', 'a'],
-        errorMessage: `Tell me the name of the action you want to remove.`,
+        errorMessage: `Tell me the name of the action you want to rename.`,
         children: [
           {
             command: null,
@@ -96,6 +96,18 @@ const tree: Tree = [
           },
         ],
       },
+      {
+        command: ['store', 'state', 's'],
+        errorMessage: `Tell me the name of the store you want to rename.`,
+        children: [
+          {
+            command: null,
+            run: async ([_, __, name, newName], root, project) => {
+              await rename.store(root, name, newName, project)
+            }
+          }
+        ]
+      }
     ],
   },
 ]
