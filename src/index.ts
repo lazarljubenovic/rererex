@@ -66,6 +66,18 @@ const tree: Tree = [
           },
         ],
       },
+      {
+        command: ['store', 'state', 's'],
+        errorMessage: `Tell me the name of the store you want to remove.`,
+        children: [
+          {
+            command: null,
+            run: async ([_, __, name], root, project) => {
+              await remove.store(root, name, project)
+            },
+          },
+        ],
+      },
     ],
   },
   {
