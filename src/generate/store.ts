@@ -41,7 +41,7 @@ export default async function generateStore (dirname: string, name: string, proj
     import { Reducer } from 'redux'
     import State, { initialState } from './state'
     import ActionType from './action-type'
-    import * as utils from '../../../utils'
+    import * as utils from '../../utils'
 
     type Action = GetActions<typeof import('./actions')>
 
