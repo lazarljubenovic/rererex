@@ -1,11 +1,12 @@
 import fs from 'fs'
 import path from 'path'
+import util from 'util'
 
 async function hasDir (parent: string, child: string): Promise<boolean> {
-  const allChildren = await fs.promises.readdir(parent)
+  const allChildren = await util.promisify(fs.readdir)(parent)
   for (const aChild of allChildren) {
     if (aChild != child) continue
-    const stat = await fs.promises.lstat(aChild)
+    const stat = await util.promisify(fs.lstat)(aChild)
     if (stat.isDirectory()) return true
   }
   return false

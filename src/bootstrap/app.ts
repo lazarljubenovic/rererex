@@ -5,6 +5,7 @@ import childProcess from 'child_process'
 import nodeUtil from 'util'
 import casing from 'change-case'
 import fs from 'fs'
+import util from 'util'
 import * as tag from 'common-tags'
 
 const exec = nodeUtil.promisify(childProcess.exec)
@@ -45,7 +46,7 @@ export async function runCommands (root: string, appName: string) {
  */
 export async function removeCss (root: string, project: Project) {
   const cssFilePaths = ['App.css', 'index.css'].map(name => path.join(root, 'src', name))
-  await Promise.all(cssFilePaths.map(path => fs.promises.unlink(path)))
+  await Promise.all(cssFilePaths.map(path => util.promisify(fs.unlink)(path)))
 
   // Remove imports
   const appFile = project.getSourceFileOrThrow(path.join(root, 'src', 'App.tsx'))
@@ -126,8 +127,8 @@ export async function prepareReduxHelpers (root: string, project: Project) {
 
   await Promise.all(files.map(file => file.save()))
 
-  await fs.promises.rename(path.join(root, 'images.d.ts'), path.join(root, 'additional.d.ts'))
-  await fs.promises.writeFile(path.join(root, 'additional.d.ts'), tag.stripIndent`
+  await util.promisify(fs.rename)(path.join(root, 'images.d.ts'), path.join(root, 'additional.d.ts'))
+  await util.promisify(fs.writeFile)(path.join(root, 'additional.d.ts'), tag.stripIndent`
     type GetActions<T extends Record<string, (...args: any[]) => any>> = ReturnType<T[keyof T]>
   `)
 }
@@ -161,7 +162,7 @@ export async function makeLinterSane (root: string) {
       }
     }
   `
-  await fs.promises.writeFile(filePath, newText, 'utf8')
+  await util.promisify(fs.writeFile)(filePath, newText, 'utf8')
 }
 
 export async function prepareStyledComponents (root: string, project: Project) {
@@ -327,7 +328,7 @@ export async function setUpApp (root: string, project: Project) {
 }
 
 export async function makeTsConfigSane (root: string, project: Project) {
-  await fs.promises.writeFile(path.join(root, 'tsconfig.json'), tag.stripIndent`
+  await util.promisify(fs.writeFile)(path.join(root, 'tsconfig.json'), tag.stripIndent`
     {
       "compilerOptions": {
         "baseUrl": ".",
