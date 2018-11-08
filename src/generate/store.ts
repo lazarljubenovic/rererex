@@ -7,18 +7,16 @@ import * as casing from 'change-case'
 export default async function generateStore (dirname: string, name: string, project: Project) {
   const root = await util.findRoot(dirname)
   if (root == null) throw new Error(`Cannot find project root.`)
-  console.info(`Project root is ${root}...`)
-  console.info(`Gonna generate a store "${name}"...`)
 
-  const storeDirPath = path.join(root, 'src', 'store', name)
+  const storeDirPath = path.join(root, 'src', 'store', casing.param(name))
   const storeDir = project.createDirectory(storeDirPath)
   storeDir.saveSync()
 
   const actionTypeFile = project.createSourceFile(path.join(storeDirPath, 'action-type.ts'))
   actionTypeFile.insertText(0, stripIndent`
     enum ActionType {
-      action1 = '${name}/action1',
-      action2 = '${name}/action2',
+      action1 = '${casing.camel(name)}/action1',
+      action2 = '${casing.camel(name)}/action2',
     }
     
     export default ActionType
@@ -95,17 +93,17 @@ export default async function generateStore (dirname: string, name: string, proj
   const storeIndexFile = project.getSourceFileOrThrow(path.join(storeDirPath, '..', 'index.ts'))
   // add import:
   storeIndexFile.addImportDeclaration({
-    namespaceImport: name,
-    moduleSpecifier: `./${name}`
+    namespaceImport: casing.camel(name),
+    moduleSpecifier: `./${casing.param(name)}`
   })
   // add export:
   const exportDeclaration = storeIndexFile.getExportDeclarationOrThrow(() => true)
-  exportDeclaration.addNamedExport(name)
+  exportDeclaration.addNamedExport(casing.camel(name))
 
   const storeReducerFile = project.getSourceFileOrThrow(path.join(storeDirPath, '..', 'reducer.ts'))
   storeReducerFile.addImportDeclaration({
-    defaultImport: name,
-    moduleSpecifier: `./${name}/reducer`
+    defaultImport: casing.camel(name),
+    moduleSpecifier: `./${casing.param(name)}/reducer`
   })
   const callExpression = storeReducerFile.getFirstDescendantByKindOrThrow(SyntaxKind.CallExpression)
   const args = callExpression.getArguments()
@@ -113,7 +111,7 @@ export default async function generateStore (dirname: string, name: string, proj
   const arg = args[0]
   if (!TypeGuards.isObjectLiteralExpression(arg)) throw new Error(`Expected the argument of combineReducers to be an object literal expression.`)
   arg.insertShorthandPropertyAssignment(arg.getProperties().length, {
-    name: casing.camel(name),
+    name: casing.camel(casing.camel(name)),
   })
 
   const storeStateFile = project.getSourceFileOrThrow(path.join(storeDirPath, '..', 'state.ts'))
@@ -123,7 +121,7 @@ export default async function generateStore (dirname: string, name: string, proj
   })
   const stateInterface = storeStateFile.getInterfaceOrThrow('State')
   stateInterface.insertProperty(stateInterface.getProperties().length, {
-    name,
+    name: casing.camel(name),
     type: casing.pascal(name),
   })
 
