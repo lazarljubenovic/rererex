@@ -21,7 +21,7 @@ const tree: Tree = [
     ],
   },
   {
-    command: ['generate', 'g'],
+    command: ['generate', 'g', 'create', 'c', 'add', 'a'],
     errorMessage: `Tell me what to generate.`,
     children: [
       {
@@ -48,6 +48,18 @@ const tree: Tree = [
           },
         ],
       },
+      {
+        command: ['page', 'p'],
+        errorMessage: `Tell me the path and name of the page you want to create.`,
+        children: [
+          {
+            command: null,
+            run: async ([_, __, name], root, project) => {
+              await generate.page(root, name, project)
+            }
+          }
+        ]
+      }
     ],
   },
   {
