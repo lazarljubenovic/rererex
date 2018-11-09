@@ -105,8 +105,9 @@ export default async function generateStore (dirname: string, name: string, proj
     defaultImport: casing.camel(name),
     moduleSpecifier: `./${casing.param(name)}/reducer`
   })
-  const callExpression = storeReducerFile.getFirstDescendantByKindOrThrow(SyntaxKind.CallExpression)
-  const args = callExpression.getArguments()
+  const callExpressions = storeReducerFile.getDescendantsOfKind(SyntaxKind.CallExpression)
+  const combineReducerCallExpression = callExpressions.find(expression => expression.getFirstDescendantByKindOrThrow(SyntaxKind.Identifier).getText() == 'combineReducers')!
+  const args = combineReducerCallExpression.getArguments()
   if (args.length != 1) throw new Error(`Expected exactly one argument of combineReducers function.`)
   const arg = args[0]
   if (!TypeGuards.isObjectLiteralExpression(arg)) throw new Error(`Expected the argument of combineReducers to be an object literal expression.`)
