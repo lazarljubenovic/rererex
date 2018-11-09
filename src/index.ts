@@ -59,7 +59,22 @@ const tree: Tree = [
             }
           }
         ]
-      }
+      },
+      {
+        command: ['form', 'f'],
+        errorMessage: `Tell me the path and name of the form you want to create.`,
+        children: [
+          {
+            command: null,
+            run: async ([_, __, fullPath], root, project) => {
+              const segments = fullPath.split('/')
+              const dirPath = segments.slice(0, -1)
+              const name = segments[segments.length - 1]
+              await generate.form(root, dirPath, name, project)
+            }
+          }
+        ]
+      },
     ],
   },
   {
