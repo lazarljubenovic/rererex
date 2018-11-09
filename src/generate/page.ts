@@ -34,13 +34,22 @@ export default async function (root: string, name: string, project: Project) {
     
     export type Props = StateProps & DispatchProps & OwnProps
     
+    export interface State {
+    }
+    
     // endregion Types
     
-    export const component: React.SFC<Props> = props => (
-      <div className="${casing.pascal(name)}">
-        <h1>${casing.title(name)}</h1>
-      </div>
-    )
+    export class Component extends React.Component<Props, State> {
+
+      public render () {
+        return (
+          <div className="${casing.pascal(name)}">
+            <h1>${casing.title(name)}</h1>
+          </div>
+        )
+      }
+
+    }
     
     // region Redux
     
@@ -52,7 +61,7 @@ export default async function (root: string, name: string, project: Project) {
       return {}
     }
     
-    export default connect(mapStateToProps, mapDispatchToProps)(component)
+    export default connect(mapStateToProps, mapDispatchToProps)(Component)
     
     // endregion Redux
   `)
