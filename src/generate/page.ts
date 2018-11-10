@@ -74,5 +74,6 @@ export default async function (root: string, name: string, project: Project) {
   barrelFile.getExportDeclarationOrThrow(() => true).addNamedExport(casing.camel(name))
 
   await project.save()
+  console.log(`Done!`)
 
 }
