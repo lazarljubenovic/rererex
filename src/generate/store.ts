@@ -8,9 +8,11 @@ export default async function generateStore (dirname: string, name: string, proj
   const root = await util.findRoot(dirname)
   if (root == null) throw new Error(`Cannot find project root.`)
 
-  const storeDirPath = path.join(root, 'src', 'store', casing.param(name))
+  const storeDirPath = path.join(util.paths.store(root), casing.param(name))
   const storeDir = project.createDirectory(storeDirPath)
   storeDir.saveSync()
+
+  const pathTo = util.paths.createPathTo(root, storeDirPath)
 
   const actionTypeFile = project.createSourceFile(path.join(storeDirPath, 'action-type.ts'))
   actionTypeFile.insertText(0, stripIndent`
@@ -24,7 +26,7 @@ export default async function generateStore (dirname: string, name: string, proj
 
   const actionsFile = project.createSourceFile(path.join(storeDirPath, 'actions.ts'))
   actionsFile.insertText(0, stripIndent`
-    import createAction from '../../create-action'
+    import createAction from '${pathTo(util.paths.createAction)}'
     import ActionType from './action-type'
     
     export const action1 = () => createAction(ActionType.action1)
@@ -39,7 +41,7 @@ export default async function generateStore (dirname: string, name: string, proj
     import { Reducer } from 'redux'
     import State, { initialState } from './state'
     import ActionType from './action-type'
-    import * as utils from '../../utils'
+    import * as utils from '${pathTo(util.paths.utils)}'
 
     type Action = GetActions<typeof import('./actions')>
 

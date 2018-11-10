@@ -2,11 +2,15 @@ import Project from 'ts-simple-ast'
 import path from 'path'
 import * as casing from 'change-case'
 import * as tags from 'common-tags'
+import * as util from '../util'
 
 export default async function (root: string, name: string, project: Project) {
 
-  const pagesPath = path.join(root, 'src', 'pages')
+  const pagesPath = util.paths.pages(root)
   const pagePath = path.join(pagesPath, casing.param(name))
+
+  const pathTo = util.paths.createPathTo(root, pagePath)
+
   project.createDirectory(pagePath)
   project.createSourceFile(path.join(pagePath, 'index.ts'), tags.stripIndent`
     import component from './component'
@@ -17,7 +21,7 @@ export default async function (root: string, name: string, project: Project) {
   `)
   project.createSourceFile(path.join(pagePath, 'component.tsx'), tags.stripIndent`
     import React from 'react'
-    import * as store from '../../store'
+    import * as store from '${pathTo(util.paths.store)}'
     import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux'
     import { Link } from 'react-router-dom'
     
