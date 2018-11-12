@@ -12,6 +12,8 @@ export default async function generateForm (root: string, dirPath: string[], nam
   const formFilePath = path.join(formDir.getPath(), `${ casing.param(name + '-form') }.tsx`)
   const pathTo = util.paths.createPathTo(root, formDir.getPath())
 
+  const componentName = casing.pascal(name) + 'Form'
+
   const fileContent = tags.stripIndent`
     import React from 'react'
     import { Field, FormSubmitHandler, InjectedFormProps, reduxForm } from 'redux-form'
@@ -20,7 +22,10 @@ export default async function generateForm (root: string, dirPath: string[], nam
     import * as store from '${pathTo(util.paths.store)}'
     import { SubmissionError422 } from '${pathTo(util.paths.serverErrors)}'
     
-    interface FormValue {
+    interface Props {
+    }
+    
+    export interface FormValue {
       example: string
     }
     
@@ -31,7 +36,7 @@ export default async function generateForm (root: string, dirPath: string[], nam
       // }
     }
     
-    const LoginFormCmp: React.SFC<InjectedFormProps> = props => (
+    const ${componentName}: React.SFC<Props & InjectedFormProps<FormValue & Props>> = props => (
       <div>
         <form onSubmit={ props.handleSubmit(formSubmitHandler) }>
           <cmps.layout.Vertical spacing={ 1 }>
@@ -52,7 +57,7 @@ export default async function generateForm (root: string, dirPath: string[], nam
       </div>
     )
     
-    export default reduxForm({ form: '${ casing.param(name) }' })(LoginFormCmp)
+    export default reduxForm<FormValue, Props>({ form: '${ casing.param(name) }' })(${componentName})
   `
 
   project.createSourceFile(formFilePath, fileContent)

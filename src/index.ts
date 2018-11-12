@@ -61,6 +61,21 @@ const tree: Tree = [
         ]
       },
       {
+        command: ['partial', 'part'],
+        errorMessage: `Tell me the path and name of the page you want to create.`,
+        children: [
+          {
+            command: null,
+            run: async ([_, __, fullPath], root, project) => {
+              const segments = fullPath.split('/')
+              const dirPath = segments.slice(0, -1)
+              const name = segments[segments.length - 1]
+              await generate.partial(root, dirPath, name, project)
+            }
+          }
+        ]
+      },
+      {
         command: ['form', 'f'],
         errorMessage: `Tell me the path and name of the form you want to create.`,
         children: [

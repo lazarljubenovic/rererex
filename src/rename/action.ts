@@ -4,20 +4,26 @@ import * as util from '../util'
 import * as casing from 'change-case'
 
 export default async function renameAction (root: string, action: string, newName: string, project: Project) {
-  const { store, actionName } = util.processActionName(action)
+
+  const { store, actionNames } = util.processActionName(action)
+  if (actionNames.length > 1) {
+    throw new Error(`You can only rename one action at a time.`)
+  }
   const storeDirPath = path.join(root, 'src', 'store', casing.param(store))
 
-  const actionTypeFile = project.getSourceFileOrThrow(path.join(storeDirPath, 'action-type.ts'))
-  const member = actionTypeFile.getEnumOrThrow('ActionType').getMemberOrThrow(casing.camel(actionName))
-  member.rename(casing.camel(newName))
-  member.setValue(`${casing.camel(store)}/${newName}`)
+  for (const actionName of actionNames) {
 
-  const actionsFile = project.getSourceFileOrThrow(path.join(storeDirPath, 'actions.ts'))
-  const declaration = actionsFile.getVariableDeclarationOrThrow(casing.camel(actionName))
-  declaration.rename(casing.camel(newName))
+    const actionTypeFile = project.getSourceFileOrThrow(path.join(storeDirPath, 'action-type.ts'))
+    const member = actionTypeFile.getEnumOrThrow('ActionType').getMemberOrThrow(casing.camel(actionName))
+    member.rename(casing.camel(newName))
+    member.setValue(`${casing.camel(store)}/${newName}`)
 
-  await actionTypeFile.save()
-  await actionsFile.save()
+    const actionsFile = project.getSourceFileOrThrow(path.join(storeDirPath, 'actions.ts'))
+    const declaration = actionsFile.getVariableDeclarationOrThrow(casing.camel(actionName))
+    declaration.rename(casing.camel(newName))
+
+  }
+
   await project.save()
 
   console.log('Done!')
