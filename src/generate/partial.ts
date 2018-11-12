@@ -37,7 +37,7 @@ export default async function (root: string, dirPath: string[], name: string, pr
     const ${componentName}: React.SFC<Props> = props => {
       return (
         <div>
-          <h3>Filters</h3>
+          <h3>${casing.sentence(componentName)}</h3>
         </div>
       )
     }
