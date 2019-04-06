@@ -63,7 +63,7 @@ export default async function (root: string, name: string, project: Project) {
     
     export default compose(
       connect(mapStateToProps, mapDispatchToProps),
-    )(Component)
+    )(${componentName})
   `)
 
   const barrelFile = project.getSourceFileOrThrow(path.join(componentsPath, 'index.ts'))
