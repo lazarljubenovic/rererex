@@ -20,42 +20,45 @@ export default async function (root: string, name: string, project: Project) {
     }
   `)
   project.createSourceFile(path.join(pagePath, 'component.tsx'), tags.stripIndent`
-    import React from 'react'
+    import * as React from 'react'
     import * as store from '${pathTo(util.paths.store)}'
     import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux'
+    import { compose } from 'redux'
     import { Link } from 'react-router-dom'
     
     // region Types
     
-    export interface StateProps {
+    interface StateProps {
     }
     
-    export interface DispatchProps {
+    interface DispatchProps {
     }
     
-    export interface OwnProps {
+    interface OwnProps {
     }
     
-    export type Props = StateProps & DispatchProps & OwnProps
+    type Props = StateProps & DispatchProps & OwnProps
     
-    export interface State {
+    interface State {
     }
     
     // endregion Types
     
-    export class Component extends React.Component<Props, State> {
+    class ${casing.pascal(name)} extends React.Component<Props, State> {
+
+      constructor (props: Props) {
+        super(props)
+      }
 
       public render () {
         return (
-          <div className="${casing.pascal(name)}">
-            <h1>${casing.title(name)}</h1>
+          <div className="Page ${casing.pascal(name)}">
+            <h1>${casing.title(name)} Page</h1>
           </div>
         )
       }
 
     }
-    
-    // region Redux
     
     const mapStateToProps: MapStateToProps<StateProps, OwnProps, store.State> = (state, ownProps) => {
       return {}
@@ -65,9 +68,9 @@ export default async function (root: string, name: string, project: Project) {
       return {}
     }
     
-    export default connect(mapStateToProps, mapDispatchToProps)(Component)
-    
-    // endregion Redux
+    export default compose(
+      connect(mapStateToProps, mapDispatchToProps),
+    )(${casing.pascal(name)})
   `)
 
   const barrelFile = project.getSourceFileOrThrow(path.join(pagesPath, 'index.ts'))

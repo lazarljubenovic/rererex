@@ -207,9 +207,9 @@ export async function prepareHomePage (root: string, project: Project) {
     
       public render () {
         return (
-          <>
-            <h1>Home</h1>
-          </>
+          <div className="Home">
+            <h1>Home Page</h1>
+          </div>
         )
       }
     

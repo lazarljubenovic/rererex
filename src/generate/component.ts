@@ -14,28 +14,13 @@ export default async function (root: string, name: string, project: Project) {
 
   project.createSourceFile(path.join(componentsPath, componentFilename), tags.stripIndent`
     import * as React from 'react'
-    import * as store from '${pathTo(util.paths.store)}'
-    import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux'
-    import { compose } from 'redux'
     import { Link } from 'react-router-dom'
     
-    // region Types
-    
-    interface StateProps {
+    interface Props {
     }
-    
-    interface DispatchProps {
-    }
-    
-    interface OwnProps {
-    }
-    
-    type Props = StateProps & DispatchProps & OwnProps
     
     interface State {
     }
-    
-    // endregion Types
     
     class ${componentName} extends React.Component<Props, State> {
 
@@ -53,24 +38,14 @@ export default async function (root: string, name: string, project: Project) {
 
     }
     
-    const mapStateToProps: MapStateToProps<StateProps, OwnProps, store.State> = (state, ownProps) => {
-      return {}
-    }
-    
-    const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (dispatch, ownProps) => {
-      return {}
-    }
-    
-    export default compose(
-      connect(mapStateToProps, mapDispatchToProps),
-    )(${componentName})
+    export default ${componentName}
   `)
 
   const barrelFile = project.getSourceFileOrThrow(path.join(componentsPath, 'index.ts'))
 
   barrelFile.addImportDeclaration({
     moduleSpecifier: `./${componentName}`,
-    namespaceImport: componentName,
+    defaultImport: componentName,
   })
   barrelFile.getExportDeclarationOrThrow(() => true).addNamedExport(componentName)
 
