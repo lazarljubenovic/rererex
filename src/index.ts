@@ -61,6 +61,18 @@ const tree: Tree = [
         ]
       },
       {
+        command: ['component', 'comp', 'cmp', 'c'],
+        errorMessage: `Tell me the name of the component you want to create.`,
+        children: [
+          {
+            command: null,
+            run: async ([_, __, name], root, project) => {
+              await generate.component(root, name, project)
+            }
+          }
+        ]
+      },
+      {
         command: ['partial', 'part'],
         errorMessage: `Tell me the path and name of the page you want to create.`,
         children: [

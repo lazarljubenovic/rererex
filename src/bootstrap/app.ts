@@ -15,7 +15,7 @@ const WHERE = IS_WIN ? 'where' : 'whereis'
 
 export async function runCommands (root: string, appName: string) {
   const cwd = casing.param(appName)
-  await exec(`yarn create react-app ${ cwd } --scripts-version=react-scripts-ts`)
+  await exec(`yarn create react-app ${ cwd } ---typescript`)
 
   const packages = [
     // router
@@ -29,6 +29,8 @@ export async function runCommands (root: string, appName: string) {
     `axios`,
     // styles
     `styled-components`,
+    // additional
+    `bind-decorator`,
   ]
   await exec(tag.inlineLists`yarn add ${ packages }`, {cwd})
 
@@ -45,10 +47,12 @@ export async function runCommands (root: string, appName: string) {
  * We use styled-components for styles.
  */
 export async function removeCss (root: string, project: Project) {
+  // CRA generates App.css and index.css in /src/ folder.
+  // Delete them.
   const cssFilePaths = ['App.css', 'index.css'].map(name => path.join(root, 'src', name))
   await Promise.all(cssFilePaths.map(path => util.promisify(fs.unlink)(path)))
 
-  // Remove imports
+  // Remove imports for those two files.
   const appFile = project.getSourceFileOrThrow(path.join(root, 'src', 'App.tsx'))
   appFile.getImportDeclarationOrThrow('./App.css').remove()
 
@@ -65,17 +69,8 @@ export async function prepareStore (root: string, project: Project) {
   const stateFile = storeDir.createSourceFile('state.ts')
   const files = [indexFile, reducerFile, stateFile]
 
-  indexFile.insertText(0, tag.stripIndent`
-    import { createStore } from 'redux'
-    import reducer from './reducer'
-    
-    import State from './state'
-    
-    const store = createStore(reducer)
-    export default store
-    
-    export {
-      State,
+  stateFile.insertText(0, tag.stripIndent`  
+    export default interface State {
     }
   `)
 
@@ -88,8 +83,17 @@ export async function prepareStore (root: string, project: Project) {
     })
   `)
 
-  stateFile.insertText(0, tag.stripIndent`  
-    export default interface State {
+  indexFile.insertText(0, tag.stripIndent`
+    import { createStore } from 'redux'
+    import reducer from './reducer'
+    
+    import State from './state'
+    
+    const store = createStore(reducer)
+    export default store
+    
+    export {
+      State,
     }
   `)
 
@@ -127,73 +131,22 @@ export async function prepareReduxHelpers (root: string, project: Project) {
 
   await Promise.all(files.map(file => file.save()))
 
-  await util.promisify(fs.rename)(path.join(root, 'images.d.ts'), path.join(root, 'additional.d.ts'))
   await util.promisify(fs.writeFile)(path.join(root, 'additional.d.ts'), tag.stripIndent`
     type GetActions<T extends Record<string, (...args: any[]) => any>> = ReturnType<T[keyof T]>
   `)
 }
 
-export async function makeLinterSane (root: string) {
-  const filePath = path.join(root, 'tslint.json')
-  const newText = tag.stripIndent`
-    {
-      "extends": [
-        "tslint:recommended",
-        "tslint-react",
-        "tslint-config-prettier"
-      ],
-      "rules": {
-        "no-empty-interface": false,
-        "interface-name": false,
-        "ordered-imports": false,
-        "jsx-boolean-value": false,
-        "object-literal-sort-keys": false,
-        "triple-equals": false,
-        "curly": [true, "ignore-same-line"],
-        "no-console": false,
-        "jsx-self-close": false
-      },
-      "linterOptions": {
-        "exclude": [
-          "config/**/*.js",
-          "node_modules/**/*.ts",
-          "coverage/lcov-report/*.js"
-        ]
-      }
-    }
-  `
-  await util.promisify(fs.writeFile)(filePath, newText, 'utf8')
-}
-
 export async function prepareStyledComponents (root: string, project: Project) {
-  const styledComponentsFile = project.createSourceFile(path.join(root, 'src', 'styled-components.ts'), tag.stripIndent`
-    import * as styledComponents from 'styled-components'
-    import ThemeInterface from './theme'
-    
-    const {
-      default: styled,
-      css,
-      createGlobalStyle,
-      keyframes,
-      ThemeProvider,
-    } = styledComponents as styledComponents.ThemedStyledComponentsModule<ThemeInterface>
-    
-    export {
-      css,
-      createGlobalStyle,
-      keyframes,
-      ThemeProvider,
-    }
-    
-    export default styled
+  const styledComponentsFile = project.createSourceFile(path.join(root, 'src', 'styled-components.d.ts'), tag.stripIndent`
+      import 'styled-components'
+
+      declare module 'styled-components' {
+        export interface DefaultTheme {
+          
+        }
+      }  
   `)
-  const themeFile = project.createSourceFile(path.join(root, 'src', 'theme.ts'), tag.stripIndent`
-    export default interface ThemeInterface {
-      accentColor: string
-      primaryColor: string
-    }
-  `)
-  const files = [styledComponentsFile, themeFile]
+  const files = [styledComponentsFile]
   await Promise.all(files.map(file => file.save()))
 }
 
@@ -209,10 +162,10 @@ export async function prepareComponentsDir (root: string, project: Project) {
 export async function prepareHomePage (root: string, project: Project) {
   const pagesDir = project.createDirectory(path.join(root, 'src', 'pages'))
   const indexFile = pagesDir.createSourceFile('index.ts', tag.stripIndent`
-    import * as home from './home'
+    import * as Home from './Home'
     
     export {
-      home,
+      Home,
     }
   `)
 
@@ -225,33 +178,42 @@ export async function prepareHomePage (root: string, project: Project) {
     }
   `)
   const homeComponentFile = homeDir.createSourceFile('component.tsx', tag.stripIndent`
-    import React from 'react'
+    import * as React from 'react'
     import * as store from '../../store'
     import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux'
+    import { compose } from 'redux'
     import * as cmps from '../../components'
+    import bind from 'bind-decorator'
     
-    // region Types
-    
-    export interface StateProps {
+    interface StateProps {
     }
     
-    export interface DispatchProps {
+    interface DispatchProps {
     }
     
-    export interface OwnProps {
+    interface OwnProps {
     }
     
-    export type Props = StateProps & DispatchProps & OwnProps
+    type Props = StateProps & DispatchProps & OwnProps
     
-    // endregion Types
+    interface State {
+    }
     
-    export const component: React.SFC<Props> = props => (
-      <div className="Home">
-        <h1>Home</h1>
-      </div>
-    )
+    class Home extends React.Component<Props, State> {
     
-    // region Redux
+      constructor (props: Props) {
+        super(props)
+      }
+    
+      public render () {
+        return (
+          <>
+            <h1>Home</h1>
+          </>
+        )
+      }
+    
+    }
     
     const mapStateToProps: MapStateToProps<StateProps, OwnProps, store.State> = (state, ownProps) => {
       return {}
@@ -261,9 +223,9 @@ export async function prepareHomePage (root: string, project: Project) {
       return {}
     }
     
-    export default connect(mapStateToProps, mapDispatchToProps)(component)
-    
-    // endregion Redux
+    export default compose(
+      connect(mapStateToProps, mapDispatchToProps),
+    )(Home)  
   `)
 
   const files = [indexFile, homeComponentFile, homeIndexFile]
@@ -278,7 +240,7 @@ export async function setUpApp (root: string, project: Project) {
     import * as pages from './pages'
     import { Provider } from 'react-redux'
     import store from './store'
-    import {createGlobalStyle} from './styled-components'
+    import {createGlobalStyle} from 'styled-components'
     
     const GlobalStyle = createGlobalStyle\`
       * {
@@ -312,7 +274,7 @@ export async function setUpApp (root: string, project: Project) {
               <div>
                 <GlobalStyle/>
                 <Switch>
-                  <Route path="/" exact component={ pages.home.component }/>
+                  <Route path="/" exact component={ pages.Home.component }/>
                 </Switch>
               </div>
             </Router>
@@ -327,48 +289,8 @@ export async function setUpApp (root: string, project: Project) {
   await app.save()
 }
 
-export async function makeTsConfigSane (root: string, project: Project) {
-  await util.promisify(fs.writeFile)(path.join(root, 'tsconfig.json'), tag.stripIndent`
-    {
-      "compilerOptions": {
-        "baseUrl": ".",
-        "outDir": "build/dist",
-        "module": "esnext",
-        "target": "es5",
-        "lib": [
-          "es6",
-          "dom"
-        ],
-        "sourceMap": true,
-        "allowJs": true,
-        "jsx": "react",
-        "moduleResolution": "node",
-        "rootDir": "src",
-        "forceConsistentCasingInFileNames": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "noImplicitAny": true,
-        "importHelpers": true,
-        "strictNullChecks": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "noUnusedLocals": false,
-        "allowSyntheticDefaultImports": true
-      },
-      "exclude": [
-        "node_modules",
-        "build",
-        "scripts",
-        "acceptance-tests",
-        "webpack",
-        "jest",
-        "src/setupTests.ts"
-      ]
-    }
-  `)
-}
-
 export async function codegen (root: string, project: Project) {
-  console.log('Removing CSS...')
+  console.log('Removing CSS files...')
   await removeCss(root, project)
 
   console.log('Preparing store...')
@@ -376,9 +298,6 @@ export async function codegen (root: string, project: Project) {
 
   console.log('Preparing Redux helpers...')
   await prepareReduxHelpers(root, project)
-
-  console.log('Making linter sane...')
-  await makeLinterSane(root)
 
   console.log('Preparing styled components...')
   await prepareStyledComponents(root, project)
@@ -391,9 +310,6 @@ export async function codegen (root: string, project: Project) {
 
   console.log('Setting up the app...')
   await setUpApp(root, project)
-
-  console.log('Making tsconfig.json sane...')
-  await makeTsConfigSane(root, project)
 
   console.log('Codegen done.')
 }
