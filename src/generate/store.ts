@@ -4,7 +4,7 @@ import Project, { SyntaxKind, TypeGuards } from 'ts-simple-ast'
 import { stripIndent } from 'common-tags'
 import * as casing from 'change-case'
 
-export default async function generateStore (dirname: string, name: string, project: Project) {
+export default async function generateStore(dirname: string, name: string, project: Project) {
   const root = await util.findRoot(dirname)
   if (root == null) throw new Error(`Cannot find project root.`)
 
@@ -34,14 +34,16 @@ export default async function generateStore (dirname: string, name: string, proj
   `)
 
   const interfacesFile = project.createSourceFile(path.join(storeDirPath, 'interfaces.ts'))
-  interfacesFile.insertText(0, '')
+  interfacesFile.insertText(0, stripIndent`
+    export interface ${casing.camel(name)} {
+    }
+  `)
 
   const reducerFile = project.createSourceFile(path.join(storeDirPath, 'reducer.ts'))
   reducerFile.insertText(0, stripIndent`
     import { Reducer } from 'redux'
-    import State, { initialState } from './state'
+    import { State, initialState } from './state'
     import ActionType from './action-type'
-    import * as utils from '${pathTo(util.paths.utils)}'
 
     type Action = GetActions<typeof import('./actions')>
 
@@ -56,7 +58,6 @@ export default async function generateStore (dirname: string, name: string, proj
             ...state,
           }
         default:
-          utils.assertNever(action)
           return state
       }
     }
@@ -69,11 +70,10 @@ export default async function generateStore (dirname: string, name: string, proj
     interface Interface {
     }
     
-    type State = Interface | null
+    export type State = Interface | null
     
     const initialState: State = null
     
-    export default State
     export { initialState }
   `)
 
@@ -99,7 +99,12 @@ export default async function generateStore (dirname: string, name: string, proj
     moduleSpecifier: `./${casing.param(name)}`
   })
   // add export:
-  const exportDeclaration = storeIndexFile.getExportDeclarationOrThrow(() => true)
+  let exportDeclaration = storeIndexFile.getExportDeclaration(() => true)
+  if (exportDeclaration == null) {
+    exportDeclaration = storeIndexFile.addExportDeclaration({
+      namedExports: [],
+    })
+  }
   exportDeclaration.addNamedExport(casing.camel(name))
 
   const storeReducerFile = project.getSourceFileOrThrow(path.join(storeDirPath, '..', 'reducer.ts'))
@@ -119,7 +124,7 @@ export default async function generateStore (dirname: string, name: string, proj
 
   const storeStateFile = project.getSourceFileOrThrow(path.join(storeDirPath, '..', 'state.ts'))
   storeStateFile.addImportDeclaration({
-    defaultImport: casing.pascal(name),
+    namedImports: [{ name: 'State', alias: casing.pascal(name) }],
     moduleSpecifier: `./${casing.param(name)}/state`,
   })
   const stateInterface = storeStateFile.getInterfaceOrThrow('State')
